@@ -3,4 +3,4 @@ This analysis provides an overview of the main trade indicators for Kosovo. The 
 
 The dataset contains monthly data from January, 2004 until June, 2022 and will be updated regularly.
 
-A short analysis based on the data can be found [here](https://medium.com/@gentiangsh/a-quick-look-at-inflation-in-kosovo-2ef2227bd638).
+A short analysis based on the data can be found [here](https://medium.com/@gentiangsh/an-overview-of-kosovos-trade-2ccf0cd6a4be).
