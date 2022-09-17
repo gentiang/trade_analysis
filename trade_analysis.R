@@ -263,47 +263,47 @@ tb %>%
 
 ggsave("trade_balance.jpg", width = 10, height = 7, dpi=300)
 
-## Monthly Trade Balance
-mtb <- df %>%
-  drop_na() %>%
-  mutate(date = date(period),
-         year = year(period),
-         month = month(period)) %>% 
-  filter(year>=2020) %>% 
-  mutate(trade = case_when(flow == "Export" ~ trade_value,
-                           flow == "Import" ~ trade_value*-1)) %>% 
-  group_by(year, month, date, flow) %>% 
-  summarize(total_trade = sum(trade)*1000) %>%
-  pivot_wider(names_from = flow, values_from = total_trade) %>%
-  mutate('Trade Balance' = Export + Import) %>% 
-  pivot_longer(!c(year, month, date), names_to = "flow", values_to = "total_trade")
-
-mtb %>% 
-  filter(flow!="Trade Balance") %>%
-  ggplot(aes(date, total_trade, fill=flow)) +
-  geom_bar(stat="identity") +
-  geom_line(aes(x=date, y=total_trade), data=mtb[mtb$flow =="Trade Balance", ], color="navy", size=1.5) +
-  scale_x_date(date_breaks = '1 month', date_labels = "%b-%Y", guide = guide_axis(angle = 90), limits = c(ymd("2020-02-01"), ymd("2022-05-01")), oob = scales::oob_keep) + #limits() excludes the limit boundaries; oob= keeps them
-  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
-  scale_fill_manual(breaks = c("Export", "Import", "Trade Balance"),
-                    values = c("steelblue", "#eb4034", "navy"),
-                    name = "Flow") +
-  labs(title="Monthly trade in Kosovo",
-       caption = "Data: Eurostat") +
-  theme_minimal() +
-  theme(plot.margin = margin(1,1,1.5,1.2, "cm"),
-        axis.title = element_blank(),
-        plot.title = element_text(size=20, face = "bold", color = "#222222"),
-        plot.subtitle = element_text(size=18),
-        plot.caption = element_text(hjust = 0, size=12),
-        axis.text = element_text(size = 15, color = "#222222"),
-        legend.key.size = unit(0.5, 'cm'), #change legend key size
-        legend.title = element_text(size=15, face = "bold"),
-        legend.text = element_text(size=10, face="bold"),
-        legend.position = "top",
-        plot.title.position = "plot") 
-
-ggsave("trade_balance_monthly.jpg", width = 10, height = 7, dpi=300)
+# ## Monthly Trade Balance
+# mtb <- df %>%
+#   drop_na() %>%
+#   mutate(date = date(period),
+#          year = year(period),
+#          month = month(period)) %>% 
+#   filter(year>=2020) %>% 
+#   mutate(trade = case_when(flow == "Export" ~ trade_value,
+#                            flow == "Import" ~ trade_value*-1)) %>% 
+#   group_by(year, month, date, flow) %>% 
+#   summarize(total_trade = sum(trade)*1000) %>%
+#   pivot_wider(names_from = flow, values_from = total_trade) %>%
+#   mutate('Trade Balance' = Export + Import) %>% 
+#   pivot_longer(!c(year, month, date), names_to = "flow", values_to = "total_trade")
+# 
+# mtb %>% 
+#   filter(flow!="Trade Balance") %>%
+#   ggplot(aes(date, total_trade, fill=flow)) +
+#   geom_bar(stat="identity") +
+#   geom_line(aes(x=date, y=total_trade), data=mtb[mtb$flow =="Trade Balance", ], color="navy", size=1.5) +
+#   scale_x_date(date_breaks = '1 month', date_labels = "%b-%Y", guide = guide_axis(angle = 90), limits = c(ymd("2020-02-01"), ymd("2022-05-01")), oob = scales::oob_keep) + #limits() excludes the limit boundaries; oob= keeps them
+#   scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+#   scale_fill_manual(breaks = c("Export", "Import", "Trade Balance"),
+#                     values = c("steelblue", "#eb4034", "navy"),
+#                     name = "Flow") +
+#   labs(title="Monthly trade in Kosovo",
+#        caption = "Data: Eurostat") +
+#   theme_minimal() +
+#   theme(plot.margin = margin(1,1,1.5,1.2, "cm"),
+#         axis.title = element_blank(),
+#         plot.title = element_text(size=20, face = "bold", color = "#222222"),
+#         plot.subtitle = element_text(size=18),
+#         plot.caption = element_text(hjust = 0, size=12),
+#         axis.text = element_text(size = 15, color = "#222222"),
+#         legend.key.size = unit(0.5, 'cm'), #change legend key size
+#         legend.title = element_text(size=15, face = "bold"),
+#         legend.text = element_text(size=10, face="bold"),
+#         legend.position = "top",
+#         plot.title.position = "plot") 
+# 
+# ggsave("trade_balance_monthly.jpg", width = 10, height = 7, dpi=300)
 
 ## Table Trade Volume
 tv <- df_year %>%
@@ -335,38 +335,38 @@ tv %>%
   gtsave("tab_1.png", expand = 10)
 
 
-## Table Monthly Trade Volume
-mtv <- df %>%
-  drop_na() %>%
-  mutate(date = date(period),
-         year = year(period),
-         month = month(period)) %>% 
-  filter(year==2022) %>%
-  mutate(trade = case_when(flow == "Export" ~ trade_value,
-                           flow == "Import" ~ trade_value*-1)) %>% 
-  group_by(date, flow) %>% 
-  summarize(total_trade = sum(trade)*1000) %>%
-  pivot_wider(names_from = flow, values_from = total_trade) %>%
-  mutate('Trade Balance' = Export + Import)
-
-mtv %>% 
-  ungroup() %>%
-  arrange(desc(date)) %>% 
-  gt() %>% 
-  tab_header(title = "Monthly trade in Kosovo") %>% 
-  opt_align_table_header(align = "left") %>% 
-  cols_label(date = "Date") %>% 
-  fmt_number(columns = c(Export, Import, 'Trade Balance'),
-             decimals = 3,
-             suffixing = T) %>%
-  fmt_date(columns = date, date_style = 11, pattern = "{x} 2022") %>% 
-  cols_width(everything() ~ px(100)) %>% 
-  tab_source_note(source_note = "The data is extracted from the Eurostat Comext portal") %>% 
-  tab_style(locations = cells_body(columns = everything(),
-                                   rows = 1), style = list(cell_fill(color = "#5599FF"),
-                                                           cell_text(color = "white"))) %>%
-  gt_theme_guardian() %>% 
-  gtsave("tab_m.png", expand = 10)
+# ## Table Monthly Trade Volume
+# mtv <- df %>%
+#   drop_na() %>%
+#   mutate(date = date(period),
+#          year = year(period),
+#          month = month(period)) %>% 
+#   filter(year==2022) %>%
+#   mutate(trade = case_when(flow == "Export" ~ trade_value,
+#                            flow == "Import" ~ trade_value*-1)) %>% 
+#   group_by(date, flow) %>% 
+#   summarize(total_trade = sum(trade)*1000) %>%
+#   pivot_wider(names_from = flow, values_from = total_trade) %>%
+#   mutate('Trade Balance' = Export + Import)
+# 
+# mtv %>% 
+#   ungroup() %>%
+#   arrange(desc(date)) %>% 
+#   gt() %>% 
+#   tab_header(title = "Monthly trade in Kosovo") %>% 
+#   opt_align_table_header(align = "left") %>% 
+#   cols_label(date = "Date") %>% 
+#   fmt_number(columns = c(Export, Import, 'Trade Balance'),
+#              decimals = 3,
+#              suffixing = T) %>%
+#   fmt_date(columns = date, date_style = 11, pattern = "{x} 2022") %>% 
+#   cols_width(everything() ~ px(100)) %>% 
+#   tab_source_note(source_note = "The data is extracted from the Eurostat Comext portal") %>% 
+#   tab_style(locations = cells_body(columns = everything(),
+#                                    rows = 1), style = list(cell_fill(color = "#5599FF"),
+#                                                            cell_text(color = "white"))) %>%
+#   gt_theme_guardian() %>% 
+#   gtsave("tab_m.png", expand = 10)
 
 ## Table HS Volume
 ### Export
@@ -463,9 +463,9 @@ dc_imp %>%
   geom_point(aes(x = total_trade, y = hss, color = year), size = 4, show.legend = TRUE) +
   guides(color=guide_legend(title="Year")) +
   geom_text(data = diff,
-            aes(label = paste("D:",label_number_si(accuracy=1)(diff)), x = x_pos, y = hss), #note that I changed the greek letter Delta to "D:" because of encoding reasons
+            aes(label = label_number_si(accuracy=1)(diff), x = x_pos, y = hss), #note that I changed the greek letter Delta to "D:" because of encoding reasons
             color = "#4a4e4d",
-            size = 2.5) +
+            size = 5) +
   scale_x_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
   scale_color_manual(values = c("steelblue", "#eb4034")) +
   labs(title="Highest increase in imports between 2021 and 2019, by HS section",
@@ -534,9 +534,9 @@ dc_exp %>%
   geom_point(aes(x = total_trade, y = hss, color = year), size = 4, show.legend = TRUE) +
   guides(color=guide_legend(title="Year")) +
   geom_text(data = diff_exp,
-            aes(label = paste("D:",label_number_si(accuracy=1)(diff)), x = x_pos, y = hss), #note that I changed the greek letter Delta to "D:" because of encoding reasons
+            aes(label = label_number_si(accuracy=1)(diff), x = x_pos, y = hss), #note that I changed the greek letter Delta to "D:" because of encoding reasons
             color = "#4a4e4d",
-            size = 2.5) +
+            size = 5) +
   scale_x_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
   scale_color_manual(values = c("steelblue", "#eb4034")) +
   labs(title="Highest increase in exports between 2021 and 2019, by HS section",
